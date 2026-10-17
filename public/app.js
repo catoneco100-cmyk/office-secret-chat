@@ -108,12 +108,17 @@ messageInput.addEventListener('keydown', (e) => {
     const text = messageInput.value.trim();
     if (!text) return;
 
-    if (text.startsWith('/')) {
+    // Only handle basic local commands. Admin commands go to server.
+    const localCommands = ['/help', '/clear', '/users', '/room', '/me'];
+    const cmd = text.split(' ')[0].toLowerCase();
+
+    if (localCommands.includes(cmd)) {
       handleCommand(text);
       messageInput.value = '';
       return;
     }
 
+    // Everything else (including /rooms, /kick, etc.) goes to server
     socket.emit('message', text);
     messageInput.value = '';
   }
@@ -129,7 +134,7 @@ function handleCommand(cmd) {
       appendSystem('// available commands:');
       appendSystem('//   /help     show this help');
       appendSystem('//   /clear    clear the terminal');
-      appendSystem('//   /users    list online users');
+      appendSystem('//   /users    list online users in this room');
       appendSystem('//   /room     show current room');
       appendSystem('//   /me       show your username');
       appendSystem('');
@@ -139,7 +144,7 @@ function handleCommand(cmd) {
       appendSystem('// terminal cleared');
       break;
     case 'users':
-      appendSystem('// fetching user list...');
+      appendSystem('// users in this room:');
       const items = userListEl.querySelectorAll('.user-item');
       if (items.length === 0) {
         appendSystem('// no users');
@@ -157,7 +162,6 @@ function handleCommand(cmd) {
       break;
     default:
       appendSystem(`// unknown command: /${command}`);
-      appendSystem('// type /help for available commands');
   }
 }
 
