@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>office-chat // terminal</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="terminal-window">
+        <div class="title-bar">
+          <span class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </span>
+          <span class="title">office-chat — login</span>
+        </div>
+        <div class="terminal-body">
+          <pre class="ascii-art">
+  OFFICE CHAT
+  no accounts // just code
+          </pre>
+          <div class="login-form">
+            <div class="line">
+              <span class="prompt">$</span>
+              <span class="cmd">whoami</span>
+            </div>
+            <div class="input-line">
+              <span class="prompt">username:</span>
+              <input type="text" id="username-input" maxlength="20" autocomplete="off" spellcheck="false" placeholder="enter_alias">
+            </div>
+            <div class="line">
+              <span class="prompt">$</span>
+              <span class="cmd">join --room</span>
+            </div>
+            <div class="input-line">
+              <span class="prompt">room_code:</span>
+              <input type="text" id="room-input" maxlength="30" autocomplete="off" spellcheck="false" placeholder="secret_channel">
+            </div>
+            <div class="hint">
+              // share the same room_code with colleagues<br>
+              // press Enter to connect
+            </div>
+            <button id="join-btn" class="btn">./connect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chat-screen" class="screen hidden">
+      <div class="terminal-window full">
+        <div class="title-bar">
+          <span class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </span>
+          <span class="title">office-chat — <span id="room-title">room</span></span>
+          <span class="status" id="status">● connected</span>
+        </div>
+        <div class="main-area">
+          <div class="chat-panel">
+            <div id="output" class="output"></div>
+            <div class="input-area">
+              <span class="prompt" id="user-prompt">user@office:~$</span>
+              <input type="text" id="message-input" autocomplete="off" spellcheck="false" placeholder="type message or /help">
+            </div>
+          </div>
+          <div class="sidebar">
+            <div class="sidebar-header">// online</div>
+            <div id="user-list" class="user-list"></div>
+            <div class="sidebar-footer">
+              <div class="cmd-hint">/help  /clear  /users</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
