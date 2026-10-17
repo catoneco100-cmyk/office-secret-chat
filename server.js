@@ -9,6 +9,11 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ====== ADMIN SETTINGS ======
+const ADMIN_USERNAME = 'admin1';
+const ADMIN_PASSWORD = 'xyao321';
+// ============================
+
 const rooms = new Map();
 
 io.on('connection', (socket) => {
@@ -60,6 +65,32 @@ io.on('connection', (socket) => {
 
     text = String(text).trim().slice(0, 500);
     if (!text) return;
+
+    // ===== ADMIN COMMAND =====
+    if (text.toLowerCase().startsWith('/rooms')) {
+      if (socket.username === ADMIN_USERNAME) {
+        const parts = text.split(' ');
+        const password = parts[1];
+
+        if (password === ADMIN_PASSWORD) {
+          let reply = `// Active rooms (${rooms.size}):\n`;
+          if (rooms.size === 0) {
+            reply += '//   (no rooms right now)';
+          } else {
+            rooms.forEach((data, roomName) => {
+              reply += `//   ${roomName}  →  ${data.users.size} people\n`;
+            });
+          }
+          socket.emit('system', { text: reply, time: new Date().toISOString() });
+        } else {
+          socket.emit('system', { text: '// wrong password', time: new Date().toISOString() });
+        }
+      } else {
+        socket.emit('system', { text: '// command not found', time: new Date().toISOString() });
+      }
+      return;
+    }
+    // ========================
 
     const roomData = rooms.get(socket.room);
     if (!roomData) return;
