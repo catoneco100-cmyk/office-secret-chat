@@ -101,18 +101,14 @@ function handleAdminCommand(socket, text) {
   function checkPass(expectedIndex) {
     return parts[expectedIndex] === ADMIN_PASSWORD;
   }
+
   function formatTimeForPeek(iso) {
     if (!iso) return '--:--:--';
     try {
       return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     } catch { return '--:--:--'; }
   }
-  function formatTimeForPeek(iso) {
-    if (!iso) return '--:--:--';
-    try {
-      return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    } catch { return '--:--:--'; }
-  }
+
   // /rooms password
   if (cmd === '/rooms') {
     if (!checkPass(1)) {
@@ -242,7 +238,8 @@ function handleAdminCommand(socket, text) {
     socket.emit('system', { text: `// broadcast sent to all rooms`, time: new Date().toISOString() });
     return true;
   }
-  // /peek roomname password  -> privately show last messages in a room without joining
+
+  // /peek roomname password
   if (cmd === '/peek') {
     if (parts.length < 3 || !checkPass(2)) {
       socket.emit('system', { text: '// usage: /peek roomname password', time: new Date().toISOString() });
@@ -269,57 +266,7 @@ function handleAdminCommand(socket, text) {
     return true;
   }
 
-  // /adminhelp password  -> list all admin commands (private to admin)
-  if (cmd === '/adminhelp') {
-    if (parts.length < 2 || !checkPass(1)) {
-      socket.emit('system', { text: '// usage: /adminhelp password', time: new Date().toISOString() });
-      return true;
-    }
-    const lines = [
-      '',
-      '// ===== ADMIN COMMANDS (password: xyao321) =====',
-      '//   /rooms password                - list all active rooms + user counts',
-      '//   /users roomname password       - list users in a specific room',
-      '//   /peek roomname password        - privately read last 15 msgs in a room',
-      '//   /kick username roomname password - kick a user from a room',
-      '//   /close roomname password       - close a room, disconnect everyone',
-      '//   /clear roomname password       - wipe a room\'s message history',
-      '//   /broadcast message password    - send a msg to every room',
-      '//   /adminhelp password            - show this list',
-      '// =============================================',
-      ''
-    ];
-    socket.emit('system', { text: lines.join('\n'), time: new Date().toISOString() });
-    return true;
-  }
-  // /peek roomname password  -> privately show last messages in a room without joining
-  if (cmd === '/peek') {
-    if (parts.length < 3 || !checkPass(2)) {
-      socket.emit('system', { text: '// usage: /peek roomname password', time: new Date().toISOString() });
-      return true;
-    }
-    const roomName = parts[1].toLowerCase();
-    const roomData = rooms.get(roomName);
-    if (!roomData) {
-      socket.emit('system', { text: `// room "${roomName}" not found`, time: new Date().toISOString() });
-      return true;
-    }
-
-    const recent = roomData.messages.slice(-15);
-    let reply = `// PEEK: "${roomName}" (${roomData.users.size} online, ${roomData.messages.length} total msgs)\n`;
-    if (recent.length === 0) {
-      reply += '//   (no messages yet)\n';
-    } else {
-      for (const m of recent) {
-        const t = formatTimeForPeek(m.time);
-        reply += `//   [${t}] ${m.username}: ${m.text}\n`;
-      }
-    }
-    socket.emit('system', { text: reply, time: new Date().toISOString() });
-    return true;
-  }
-
-  // /adminhelp password  -> list all admin commands (private to admin)
+  // /adminhelp password
   if (cmd === '/adminhelp') {
     if (parts.length < 2 || !checkPass(1)) {
       socket.emit('system', { text: '// usage: /adminhelp password', time: new Date().toISOString() });
@@ -374,4 +321,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Office Secret Chat running on port ${PORT}`);
 });
-add /peek and /adminhelp admin commands
