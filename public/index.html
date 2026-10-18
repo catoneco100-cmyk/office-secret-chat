@@ -69,10 +69,15 @@
         <div class="main-area">
           <div class="chat-panel">
             <div id="output" class="output"></div>
-            <div class="input-area">
+            
+            <!-- Updated Input Area with Image Upload -->
+            <div class="input-area" style="display: flex; align-items: center; gap: 5px;">
               <span class="prompt" id="user-prompt">user@office:~$</span>
-              <input type="text" id="message-input" autocomplete="off" spellcheck="false" placeholder="type message or /help">
+              <input type="file" id="image-input" accept="image/*" style="display: none;">
+              <button id="upload-btn" type="button" style="padding: 5px; cursor: pointer; background: transparent; border: none; color: #3fb950; font-size: 18px; outline: none;" title="Send Image">📎</button>
+              <input type="text" id="message-input" autocomplete="off" spellcheck="false" placeholder="type message or /help" style="flex-grow: 1;">
             </div>
+            
           </div>
           <div class="sidebar">
             <div class="sidebar-header">// online</div>
