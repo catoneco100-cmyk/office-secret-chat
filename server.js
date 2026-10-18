@@ -5,7 +5,8 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// Increased max buffer size slightly to handle one-time base64 images smoothly
+const io = new Server(server, { maxHttpBufferSize: 1e7 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -61,28 +62,37 @@ io.on('connection', (socket) => {
   socket.on('message', (text) => {
     if (!socket.room || !socket.username) return;
 
-    text = String(text).trim().slice(0, 500);
-    if (!text) return;
+    // Check if it's an image object
+    const isImage = typeof text === 'object' && text.image !== undefined;
 
-    // ========== ADMIN COMMANDS ==========
-    if (socket.username === ADMIN_USERNAME && text.startsWith('/')) {
-      const result = handleAdminCommand(socket, text);
-      if (result) return; // command was handled
+    if (!isImage) {
+      text = String(text).trim().slice(0, 500);
+      if (!text) return;
+
+      // ========== ADMIN COMMANDS ==========
+      if (socket.username === ADMIN_USERNAME && text.startsWith('/')) {
+        const result = handleAdminCommand(socket, text);
+        if (result) return; // command was handled
+      }
+      // ===================================
     }
-    // ===================================
 
     const roomData = rooms.get(socket.room);
     if (!roomData) return;
 
     const msg = {
       username: socket.username,
-      text,
+      text: isImage ? '[Image]' : text,
+      image: isImage ? text.image : null,
       time: new Date().toISOString()
     };
 
-    roomData.messages.push(msg);
-    if (roomData.messages.length > 200) {
-      roomData.messages.shift();
+    // ONLY save text messages to history (one-time images are not saved)
+    if (!isImage) {
+      roomData.messages.push(msg);
+      if (roomData.messages.length > 200) {
+        roomData.messages.shift();
+      }
     }
 
     io.to(socket.room).emit('message', msg);
