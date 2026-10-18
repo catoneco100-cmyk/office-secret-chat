@@ -12,6 +12,10 @@ const roomTitle = document.getElementById('room-title');
 const userListEl = document.getElementById('user-list');
 const statusEl = document.getElementById('status');
 
+// Image elements
+const imageInput = document.getElementById('image-input');
+const uploadBtn = document.getElementById('upload-btn');
+
 let currentUsername = '';
 let currentRoom = '';
 
@@ -178,10 +182,16 @@ function appendMessage(msg) {
   const isSelf = msg.username === currentUsername;
   const time = formatTime(msg.time);
 
+  // Check if the message contains an image
+  const content = msg.image 
+    ? `<img src="${msg.image}" style="max-width: 250px; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block;" />` 
+    : escapeHtml(msg.text);
+
   div.innerHTML = `
     <span class="time">${time}</span>
     <span class="user ${isSelf ? 'self' : ''}">${escapeHtml(msg.username)}</span>
-    <span class="text">: ${escapeHtml(msg.text)}</span>
+    <span class="text">: </span>
+    ${content}
   `;
 
   output.appendChild(div);
@@ -205,6 +215,33 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ==========================================
+// IMAGE UPLOAD LOGIC
+// ==========================================
+if (uploadBtn && imageInput) {
+  uploadBtn.addEventListener('click', () => imageInput.click());
+
+  imageInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    // 500KB limit so the server doesn't crash (base64 makes files bigger)
+    if (file.size > 500000) { 
+      alert("Please choose an image smaller than 500KB for a one-time message.");
+      this.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      // Send image data to the server
+      socket.emit('message', { image: e.target.result });
+    };
+    reader.readAsDataURL(file);
+    this.value = ''; // Reset input so the same file can be selected again
+  });
 }
 
 window.addEventListener('beforeunload', (e) => {
