@@ -109,7 +109,7 @@ messageInput.addEventListener('keydown', (e) => {
     if (!text) return;
 
     // Only handle basic local commands. Admin commands go to server.
-    const localCommands = ['/help', '/clear', '/users', '/room', '/me'];
+    const localCommands = ['/help', '/clear', '/room', '/me'];
     const cmd = text.split(' ')[0].toLowerCase();
 
     if (localCommands.includes(cmd)) {
